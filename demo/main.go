@@ -37,6 +37,7 @@ func (t *Chaincode) creator(stub shim.ChaincodeStubInterface, args []string) pb.
 	if err := json.Unmarshal(bytes, &creator); err != nil {
 		return shim.Error("unmarshal creator error: " + err.Error())
 	}
+	return shim.Success(nil)
 }
 
 //{"Args":["call","chaincode","method"...]}'
