@@ -1,4 +1,4 @@
-// Create: 2018/04/03 17:12:00 Change: 2018/04/26 16:27:36
+// Create: 2018/04/03 17:12:00 Change: 2018/05/07 21:23:27
 // FileName: main.go
 // Copyright (C) 2018 lijiaocn <lijiaocn@foxmail.com>
 //
@@ -9,6 +9,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/msp"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -23,6 +24,24 @@ func ToChaincodergs(args ...string) [][]byte {
 }
 
 type Chaincode struct {
+}
+
+//{"Args":["attr", "name"]}'
+func (t *Chaincode) attr(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	fmt.Println("get attr: ", args[0])
+	value, ok, err := cid.GetAttributeValue(stub, args[0])
+	if err != nil {
+		return shim.Error("get attr error: " + err.Error())
+	}
+
+	if ok == false {
+		value = "not found"
+	}
+	bytes, err := json.Marshal(value)
+	if err != nil {
+		return shim.Error("json marshal error: " + err.Error())
+	}
+	return shim.Success(bytes)
 }
 
 //{"Args":["creator"]}'
@@ -151,6 +170,11 @@ func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.call(stub, args)
 	case "append": //追加
 		return t.append(stub, args)
+	case "attr":
+		if len(args) != 1 {
+			return shim.Error("parametes's number is wrong")
+		}
+		return t.attr(stub, args)
 	case "query": //查询
 		if len(args) != 1 {
 			return shim.Error("parametes's number is wrong")
