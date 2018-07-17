@@ -1,4 +1,4 @@
-// Create: 2018/04/03 17:12:00 Change: 2018/05/07 21:23:27
+// Create: 2018/04/03 17:12:00 Change: 2018/07/17 10:41:21
 // FileName: main.go
 // Copyright (C) 2018 lijiaocn <lijiaocn@foxmail.com>
 //
@@ -28,6 +28,9 @@ type Chaincode struct {
 
 //{"Args":["attr", "name"]}'
 func (t *Chaincode) attr(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 1 {
+		return shim.Error("parametes's number is wrong")
+	}
 	fmt.Println("get attr: ", args[0])
 	value, ok, err := cid.GetAttributeValue(stub, args[0])
 	if err != nil {
@@ -164,37 +167,43 @@ func (t *Chaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	function, args := stub.GetFunctionAndParameters()
 	switch function {
+	//返回调用者信息
 	case "creator":
 		return t.creator(stub, args)
-	case "call": //调用
+	//调用改合约中的其它方法，用来演示复杂的调用
+	case "call":
 		return t.call(stub, args)
-	case "append": //追加
+	//直接对key的内容进行append，用来演示这样操作的结果
+	case "append":
 		return t.append(stub, args)
+	//读取当前用户的属性值
 	case "attr":
-		if len(args) != 1 {
-			return shim.Error("parametes's number is wrong")
-		}
 		return t.attr(stub, args)
-	case "query": //查询
+	//查询一个key的当前值
+	case "query":
 		if len(args) != 1 {
 			return shim.Error("parametes's number is wrong")
 		}
 		return t.query(stub, args[0])
-	case "history": //查询
+	//查询一个key的所有历史值
+	case "history":
 		if len(args) != 1 {
 			return shim.Error("parametes's number is wrong")
 		}
 		return t.history(stub, args[0])
+	//创建一个key，并写入key的值
 	case "write": //写入
 		if len(args) != 2 {
 			return shim.Error("parametes's number is wrong")
 		}
 		return t.write(stub, args[0], args[1])
+	//通过当前合约，到另一个合约中进行查询
 	case "query_chaincode":
 		if len(args) != 2 {
 			return shim.Error("parametes's number is wrong")
 		}
 		return t.query_chaincode(stub, args[0], args[1])
+	//通过当前合约，到另一个合约中进行写入
 	case "write_chaincode":
 		if len(args) != 3 {
 			return shim.Error("parametes's number is wrong")
