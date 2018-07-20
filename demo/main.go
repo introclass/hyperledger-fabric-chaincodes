@@ -1,4 +1,4 @@
-// Create: 2018/04/03 17:12:00 Change: 2018/07/17 10:41:21
+// Create: 2018/04/03 17:12:00 Change: 2018/07/20 16:47:26
 // FileName: main.go
 // Copyright (C) 2018 lijiaocn <lijiaocn@foxmail.com>
 //
@@ -7,6 +7,8 @@
 package main
 
 import (
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
@@ -47,6 +49,46 @@ func (t *Chaincode) attr(stub shim.ChaincodeStubInterface, args []string) pb.Res
 	return shim.Success(bytes)
 }
 
+//{"Args":["creator2"]}'
+func (t *Chaincode) creator2(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	var cinfo struct {
+		ID   string
+		ORG  string
+		CERT *x509.Certificate
+	}
+
+	fmt.Println("creator2: ", args)
+
+	id, err := cid.GetID(stub)
+	if err != nil {
+		return shim.Error("getid error: " + err.Error())
+	}
+
+	id_readable, err := base64.StdEncoding.DecodeString(id)
+	if err != nil {
+		return shim.Error("base64 decode error: " + err.Error())
+	}
+	cinfo.ID = string(id_readable)
+
+	mspid, err := cid.GetMSPID(stub)
+	if err != nil {
+		return shim.Error("getmspid error: " + err.Error())
+	}
+	cinfo.ORG = mspid
+
+	cert, err := cid.GetX509Certificate(stub)
+	if err != nil {
+		return shim.Error("getX509Cert error: " + err.Error())
+	}
+	cinfo.CERT = cert
+
+	bytes, err := json.Marshal(cinfo)
+	if err != nil {
+		return shim.Error("json marshal error: " + err.Error())
+	}
+	return shim.Success(bytes)
+}
+
 //{"Args":["creator"]}'
 func (t *Chaincode) creator(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	fmt.Println("creator: ", args)
@@ -55,6 +97,9 @@ func (t *Chaincode) creator(stub shim.ChaincodeStubInterface, args []string) pb.
 		return shim.Error("get creator error: " + err.Error())
 	}
 
+	// TODO: status: 500, message: unmarshal creator error: invalid character '\x19'
+	//       looking for beginning of value, bytes:
+	// I don't known why now @time @2018-07-20 15:50:42
 	var creator msp.SerializedIdentity
 	if err := json.Unmarshal(bytes, &creator); err != nil {
 		return shim.Error("unmarshal creator error: " + err.Error())
@@ -170,6 +215,9 @@ func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	//返回调用者信息
 	case "creator":
 		return t.creator(stub, args)
+	//返回调用者信息，方法2
+	case "creator2":
+		return t.creator2(stub, args)
 	//调用改合约中的其它方法，用来演示复杂的调用
 	case "call":
 		return t.call(stub, args)
