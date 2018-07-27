@@ -1,4 +1,4 @@
-// Create: 2018/04/03 17:12:00 Change: 2018/07/27 13:30:37
+// Create: 2018/04/03 17:12:00 Change: 2018/07/27 13:47:10
 // FileName: main.go
 // Copyright (C) 2018 lijiaocn <lijiaocn@foxmail.com>
 //
@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"github.com/hyperledger/fabric/core/chaincode/lib/cid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/msp"
+	//"github.com/hyperledger/fabric/protos/msp"
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
