@@ -1,4 +1,4 @@
-// Create: 2018/04/03 17:12:00 Change: 2018/07/20 16:47:26
+// Create: 2018/04/03 17:12:00 Change: 2018/07/27 13:30:37
 // FileName: main.go
 // Copyright (C) 2018 lijiaocn <lijiaocn@foxmail.com>
 //
@@ -98,13 +98,14 @@ func (t *Chaincode) creator(stub shim.ChaincodeStubInterface, args []string) pb.
 	}
 
 	// TODO: status: 500, message: unmarshal creator error: invalid character '\x19'
-	//       looking for beginning of value, bytes:
-	// I don't known why now @time @2018-07-20 15:50:42
-	var creator msp.SerializedIdentity
-	if err := json.Unmarshal(bytes, &creator); err != nil {
-		return shim.Error("unmarshal creator error: " + err.Error())
-	}
-	return shim.Success(nil)
+	//looking for beginning of value, bytes:
+	/*
+		var creator msp.SerializedIdentity
+		if err := json.Unmarshal(bytes, &creator); err != nil {
+			return shim.Error("unmarshal creator error: " + err.Error())
+		}
+	*/
+	return shim.Success(bytes)
 }
 
 //{"Args":["call","chaincode","method"...]}'
